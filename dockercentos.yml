@@ -1,0 +1,45 @@
+---
+- name: DOCKER FOR CENTOS
+  hosts: centos
+  become: yes
+
+  tasks:
+    - name: Install prerequisite packages
+      ansible.builtin.yum:
+        name:
+          - yum-utils
+          - device-mapper-persistent-data
+          - lvm2
+          - curl
+          - ca-certificates
+        state: present
+
+    - name: Add Docker repository
+      ansible.builtin.command:
+        cmd: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+      args:
+        creates: /etc/yum.repos.d/docker-ce.repo
+
+    - name: Install Docker Engine
+      ansible.builtin.yum:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+        state: present
+
+    - name: Install Docker SDK for Python
+      ansible.builtin.yum:
+        name: python3-pip
+        state: present
+
+    - name: Install docker Python module
+      ansible.builtin.pip:
+        name: docker
+        state: present
+
+    - name: Start and enable Docker service
+      ansible.builtin.service:
+        name: docker
+        state: started
+        enabled: yes
